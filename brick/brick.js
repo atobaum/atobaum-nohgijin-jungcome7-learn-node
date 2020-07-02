@@ -108,6 +108,21 @@ class Brick {
     ctx.fill();
     ctx.closePath();
   }
+  isCollide(x, y) {
+    if (
+      this.status === 1 &&
+      x > this.x &&
+      x < this.x + Brick.brickWidth &&
+      y > this.y &&
+      y < this.y + Brick.brickHeight
+    )
+      return true;
+    else return false;
+  }
+
+  die() {
+    this.status = 0;
+  }
 }
 
 Brick.brickHeight = 20;
@@ -115,12 +130,13 @@ Brick.brickWidth = 75;
 
 class Bricks {
   constructor() {
+    this.bricks = [];
     for (var c = 0; c < brickColumnCount; c++) {
-      bricks[c] = [];
+      this.bricks[c] = [];
       for (var r = 0; r < brickRowCount; r++) {
         var brickX = r * (Brick.brickWidth + brickPadding) + brickOffsetLeft;
         var brickY = c * (Brick.brickHeight + brickPadding) + brickOffsetTop;
-        bricks[c][r] = new Brick(brickX, brickY);
+        this.bricks[c][r] = new Brick(brickX, brickY);
       }
     }
   }
@@ -128,7 +144,7 @@ class Bricks {
   draw(ctx) {
     for (var c = 0; c < brickColumnCount; c++) {
       for (var r = 0; r < brickRowCount; r++) {
-        bricks[c][r].draw(ctx);
+        this.bricks[c][r].draw(ctx);
       }
     }
   }
@@ -189,21 +205,14 @@ class Game {
   collisionDetection() {
     for (var c = 0; c < brickColumnCount; c++) {
       for (var r = 0; r < brickRowCount; r++) {
-        var b = bricks[c][r];
-        if (b.status == 1) {
-          if (
-            x > b.x &&
-            x < b.x + Brick.brickWidth &&
-            y > b.y &&
-            y < b.y + Brick.brickHeight
-          ) {
-            dy = -dy;
-            b.status = 0;
-            score++;
-            if (score == brickRowCount * brickColumnCount) {
-              alert("YOU WIN, CONGRATS!");
-              document.location.reload();
-            }
+        var b = this.bricks.bricks[c][r];
+        if (b.isCollide(x, y)) {
+          dy = -dy;
+          b.die();
+          score++;
+          if (score == brickRowCount * brickColumnCount) {
+            alert("YOU WIN, CONGRATS!");
+            document.location.reload();
           }
         }
       }
