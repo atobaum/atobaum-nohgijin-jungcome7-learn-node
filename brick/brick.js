@@ -12,8 +12,6 @@ var rightPressed = false;
 var leftPressed = false;
 var brickRowCount = 5;
 var brickColumnCount = 3;
-var brickWidth = 75;
-var brickHeight = 20;
 var brickPadding = 10;
 var brickOffsetTop = 30;
 var brickOffsetLeft = 30;
@@ -21,12 +19,6 @@ var score = 0;
 var lives = 3;
 
 var bricks = [];
-for (var c = 0; c < brickColumnCount; c++) {
-  bricks[c] = [];
-  for (var r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1 };
-  }
-}
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -84,31 +76,50 @@ class Ball {
   }
 }
 
+class Brick {
+  constructor(x, y) {
+    this.status = 1;
+    this.x = x;
+    this.y = y;
+  }
+  draw(ctx) {
+    if (this.status == 0) return;
+    ctx.beginPath();
+    ctx.rect(this.x, this.y, Brick.brickWidth, Brick.brickHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+  }
+}
+
+Brick.brickHeight = 20;
+Brick.brickWidth = 75;
+
 class Bricks {
-  constructor() {}
+  constructor() {
+    for (var c = 0; c < brickColumnCount; c++) {
+      bricks[c] = [];
+      for (var r = 0; r < brickRowCount; r++) {
+        var brickX = r * (Brick.brickWidth + brickPadding) + brickOffsetLeft;
+        var brickY = c * (Brick.brickHeight + brickPadding) + brickOffsetTop;
+        bricks[c][r] = new Brick(brickX, brickY);
+      }
+    }
+  }
 
   draw(ctx) {
     for (var c = 0; c < brickColumnCount; c++) {
       for (var r = 0; r < brickRowCount; r++) {
-        if (bricks[c][r].status == 1) {
-          var brickX = r * (brickWidth + brickPadding) + brickOffsetLeft;
-          var brickY = c * (brickHeight + brickPadding) + brickOffsetTop;
-          bricks[c][r].x = brickX;
-          bricks[c][r].y = brickY;
-          ctx.beginPath();
-          ctx.rect(brickX, brickY, brickWidth, brickHeight);
-          ctx.fillStyle = "#0095DD";
-          ctx.fill();
-          ctx.closePath();
-        }
+        bricks[c][r].draw(ctx);
       }
     }
   }
 }
 
 class Game {
-  constructor(ctx) {
-    this.ctx = ctx;
+  constructor(canvas) {
+    this.ctx = canvas.getContext("2d");
+
     this.bricks = new Bricks();
     this.ball = new Ball();
     this.paddle = new Paddle();
@@ -164,9 +175,9 @@ class Game {
         if (b.status == 1) {
           if (
             x > b.x &&
-            x < b.x + brickWidth &&
+            x < b.x + Brick.brickWidth &&
             y > b.y &&
-            y < b.y + brickHeight
+            y < b.y + Brick.brickHeight
           ) {
             dy = -dy;
             b.status = 0;
@@ -182,5 +193,5 @@ class Game {
   }
 }
 
-const game = new Game(ctx);
+const game = new Game(canvas);
 game.draw();
