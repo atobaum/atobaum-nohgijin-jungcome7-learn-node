@@ -41,7 +41,7 @@ function keyUpHandler(e) {
 function mouseMoveHandler(e) {
   var relativeX = e.clientX - canvas.offsetLeft;
   if (relativeX > 0 && relativeX < canvas.width) {
-    paddleX = relativeX - paddleWidth / 2;
+    game.paddle.moveTo(relativeX - Paddle.width / 2);
   }
 }
 
@@ -57,14 +57,32 @@ function drawLives() {
 }
 
 class Paddle {
+  constructor() {
+    this.x = paddleX;
+  }
   draw(ctx) {
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.rect(
+      this.x,
+      canvas.height - Paddle.height,
+      Paddle.width,
+      Paddle.height
+    );
     ctx.fillStyle = "#0095DD";
     ctx.fill();
     ctx.closePath();
   }
+
+  move(dx) {
+    this.x += dx;
+  }
+
+  moveTo(x) {
+    this.x = x;
+  }
 }
+Paddle.width = 75;
+Paddle.height = 10;
 
 class Ball {
   draw(ctx) {
@@ -140,7 +158,7 @@ class Game {
     if (y + dy < ballRadius) {
       dy = -dy;
     } else if (y + dy > canvas.height - ballRadius) {
-      if (x > paddleX && x < paddleX + paddleWidth) {
+      if (x > this.paddle.x && x < this.paddle.x + Paddle.width) {
         dy = -dy;
       } else {
         lives--;
@@ -152,15 +170,15 @@ class Game {
           y = canvas.height - 30;
           dx = 3;
           dy = -3;
-          paddleX = (canvas.width - paddleWidth) / 2;
+          this.paddle.moveTo((canvas.width - Paddle.width) / 2);
         }
       }
     }
 
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-      paddleX += 7;
+    if (rightPressed && this.paddle.x < canvas.width - Paddle.width) {
+      this.paddle.move(7);
     } else if (leftPressed && paddleX > 0) {
-      paddleX -= 7;
+      this.paddle.move(-7);
     }
 
     x += dx;
